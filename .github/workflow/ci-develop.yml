@@ -1,0 +1,39 @@
+name: Develop CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Run Tests
+        run: mvn test
+
+      - name: Check for Tests
+        run: |
+          if ! git ls-files | grep -q "src/test/java"; then
+            echo "Chưa có bài kiểm tra! Vui lòng thêm tests."
+            exit 1
+          fi
+
+      - name: Merge develop into main
+        if: success()
+        run: |
+          git checkout main
+          git merge develop
+          git push origin main

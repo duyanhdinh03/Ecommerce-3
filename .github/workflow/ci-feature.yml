@@ -1,0 +1,32 @@
+name: Feature CI Pipeline
+
+on:
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Run Tests
+        run: mvn test
+
+      - name: Merge to develop
+        if: github.ref == 'refs/heads/feature/*' && success()
+        run: |
+          git checkout develop
+          git merge feature/${{ github.head_ref }}
+          git push origin develop
