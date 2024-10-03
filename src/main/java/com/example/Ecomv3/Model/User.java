@@ -25,8 +25,8 @@ public class User implements UserDetails {
     @NotBlank
     @Email
     private String email;
-    @NotBlank
 
+    @NotBlank
     private String password;
 
     @Enumerated(EnumType.STRING)
