@@ -22,7 +22,7 @@ jobs:
       - name: Set up Maven
         uses: s4u/maven-install@v2
         with:
-          maven-version: '3.3.2'
+          maven-version: '4.0.0'
 
       - name: Build with Maven
         run: mvn clean install
