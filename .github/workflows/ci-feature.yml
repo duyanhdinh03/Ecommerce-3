@@ -20,17 +20,20 @@ jobs:
           distribution: 'temurin'
 
       - name: Set up Maven
-        run: sudo apt-get install maven -y
+        uses: s4u/maven-install@v2
+        with:
+          maven-version: '3.3.2'
 
       - name: Build with Maven
-        run: mvn clean install -X
+        run: mvn clean install
 
       - name: Run Tests
-        run: mvn test -X
+        run: mvn test
 
       - name: Merge to develop
-        if: github.ref == 'refs/heads/feature/*' && success()
+        if: startsWith(github.ref, 'refs/heads/feature/') && success()
         run: |
+          git fetch origin develop
           git checkout develop
           git merge feature/${{ github.head_ref }}
           git push origin develop
