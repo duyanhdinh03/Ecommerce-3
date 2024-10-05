@@ -59,9 +59,9 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
     @Bean
-    public UserDetailsService userDetailsService(){
-        return username -> (UserDetails) userRepository.findByEmail(username)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
     @Bean
     public DaoAuthenticationProvider authenticationProvider(){
