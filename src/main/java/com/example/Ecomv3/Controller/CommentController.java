@@ -3,6 +3,7 @@ package com.example.Ecomv3.Controller;
 
 import com.example.Ecomv3.DTO.CommentDTO;
 import com.example.Ecomv3.Model.User;
+import com.example.Ecomv3.Service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class CommentController {
                                                  @AuthenticationPrincipal UserDetails userDetails,
                                                  @Valid @RequestBody CommentDTO commentDTO) {
         Long userID = ((User) userDetails).getId();
-        return ResponseEntity.ok(commentService.addComment(productId, userID, commentDTO));
+        return ResponseEntity.ok(commentService.addComment((long) productId, userID, commentDTO));
 
     }
 
