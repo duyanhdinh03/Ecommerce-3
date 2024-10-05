@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,13 +28,16 @@ public class OrderService {
     private final CartService cartService;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-
+    private final EmailService emailService;
     private final OrderMapper orderMapper;
     private final CartMapper cartMapper;
     @Transactional
     public OrderDTO createOrder(Long userId, String address, String phoneNumber){
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
+        if(!user.isEmailConfirmation()){
+            throw new IllegalStateException("Email not confirmed. Please confirm email before placing order");
+        }
         CartDTO cartDTO = cartService.getCart(userId);
         Cart cart = cartMapper.toEntity(cartDTO);
         if(cart.getItems().isEmpty()){
@@ -49,6 +53,11 @@ public class OrderService {
         order.setItems(orderItems);
         Order savedOrder = orderRepository.save(order);
         cartService.clearCart(userId);
+        try{
+            emailService.sendOrderConfirmation(savedOrder);
+        }catch (MailException e){
+            logger.error("Failed to send order confirmation email for order ID "+savedOrder.getId(), e);
+        }
         return orderMapper.toDTO(savedOrder);
     }
     private List<OrderItem> createOrderItems(Cart cart, Order order){

@@ -8,20 +8,25 @@ import com.example.Ecomv3.Model.Product;
 import com.example.Ecomv3.Repositories.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+
     private static final String UPLOAD_DIR = "src/main/resources/static/images/";
+
     @Transactional
     public ProductDTO createProduct(ProductDTO productDTO, MultipartFile image) throws IOException{
         Product product = productMapper.toEntity(productDTO);
@@ -32,6 +37,7 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
         return productMapper.toDTO(savedProduct);
     }
+
     @Transactional
     public ProductDTO updateProduct(Long id, ProductDTO productDTO, MultipartFile image) throws IOException{
         Product existingProduct = productRepository.findById(id)
@@ -47,6 +53,7 @@ public class ProductService {
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toDTO(updatedProduct);
     }
+
     @Transactional
     public void deleteProduct(Long id){
         if(!productRepository.existsById(id)){
@@ -54,13 +61,14 @@ public class ProductService {
         }
         productRepository.deleteById(id);
     }
+
     public ProductDTO getProduct(Long id){
         Product product = productRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Product not found"));
         return productMapper.toDTO(product);
     }
-    public List<ProductListDTO> getAllProducts(){
-        return productRepository.findAllWithoutComments();
+    public Page<ProductListDTO> getAllProducts(Pageable pageable) {
+        return productRepository.findAllWithoutComments(pageable);
     }
     private String saveImage(MultipartFile image) throws  IOException{
         String fileName = UUID.randomUUID().toString()+"_"+image.getOriginalFilename();
